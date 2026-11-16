@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-app="visit">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulated Consultation</title>
+<link rel="stylesheet" href="/shared/ui.css">
+<style>
+  .vgrid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+  .vgrid.three { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr) minmax(0, 1fr); }
+  @media (max-width: 1300px) { .vgrid, .vgrid.three { grid-template-columns: 1fr; } }
+  .talk { display: flex; flex-direction: column; gap: 0.5rem; max-height: 56vh; overflow: auto; padding: 0.25rem; }
+  .turn { max-width: 82%; padding: 0.5rem 0.75rem; border-radius: 0.875rem; background: var(--surface-2); border: 1px solid var(--line); }
+  .turn.interviewer { align-self: flex-end; background: var(--accent-soft); color: var(--on-accent-soft); border-color: transparent; }
+  .turn.family { border-style: dashed; }
+  .turn .who { display: block; font-size: 0.9063rem; font-weight: 600; opacity: .8; }
+  .turn .heard { display: block; font-size: 0.9375rem; opacity: .8; margin-top: 0.125rem; }
+  .turn audio { display: block; margin-top: 0.25rem; height: 2rem; max-width: 100%; }
+  .sayrow { display: flex; gap: 0.5rem; margin-top: 0.625rem; align-items: center; }
+  .sayrow input[type="text"] { flex: 1; }
+  .vhead { display: flex; flex-wrap: wrap; gap: 0.5rem 0.875rem; align-items: center; margin-bottom: 0.75rem; }
+  .timer { font-variant-numeric: tabular-nums; font-weight: 650; font-size: 1.375rem; }
+  .setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(18.75rem, 1fr)); gap: 0.75rem 1.125rem; }
+  .setup label { display: flex; flex-direction: column; gap: 0.25rem; font-weight: 600; font-size: 1.0313rem; }
+  .setup .checks { font-weight: 400; }
+  .scoregrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(11.875rem, 1fr)); gap: 0.625rem; }
+  .scoregrid .v { background: var(--surface-2); border-radius: 0.5rem; padding: 0.5rem 0.625rem; }
+  .scoregrid .v b { display: block; font-size: 1.375rem; font-variant-numeric: tabular-nums; }
+  .draft pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+  ul.plain { margin: 0.25rem 0 0.5rem; padding-left: 1.25rem; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/visit/app.js"></script>
+</body>
+</html>

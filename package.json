@@ -1,0 +1,45 @@
+{
+  "name": "healthcare-insilico",
+  "version": "0.10.0",
+  "private": true,
+  "description": "Healthcare InSilico: an open-source, deployable, multimodal clinical environment (EHR, PACS, pathology, patient portal, insurance, agent dashboard) for training, evaluating and monitoring clinical AI agents. Simulation only.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node platform/server/index.mjs",
+    "start": "node platform/server/index.mjs",
+    "session-secret": "node scripts/session-secret.mjs",
+    "check": "node scripts/check.mjs",
+    "sync": "node scripts/sync-shared.mjs",
+    "test": "node --test tests/*.mjs",
+    "import": "node scripts/import.mjs",
+    "sdc-sim": "node scripts/sdc-sim.mjs",
+    "check:prices": "node scripts/check-payer-reference.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "db:backup": "node scripts/db-backup.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "setup": "node scripts/setup.mjs",
+    "install-check": "node scripts/install-check.mjs",
+    "env:serve": "ENV_API_ENABLED=true node platform/server/index.mjs",
+    "env:cluster": "ENV_API_ENABLED=true node platform/server/cluster.mjs",
+    "env:bench": "node scripts/env-bench.mjs",
+    "storage:copy": "node scripts/storage-copy.mjs"
+  },
+  "devDependencies": {
+    "@cornerstonejs/core": "^5.17.1",
+    "@cornerstonejs/dicom-image-loader": "^5.17.1",
+    "@cornerstonejs/nifti-volume-loader": "^5.17.1",
+    "@cornerstonejs/tools": "^5.17.1",
+    "esbuild": "^0.28.2",
+    "openseadragon": "^5.0.1"
+  },
+  "dependencies": {
+    "cql-exec-fhir": "^2.2.0",
+    "cql-execution": "^3.3.2",
+    "onnxruntime-node": "^1.22.0",
+    "pg": "^8.23.1"
+  }
+}

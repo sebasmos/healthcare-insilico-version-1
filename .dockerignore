@@ -1,0 +1,22 @@
+# Nothing under data/ is ever in a build.
+.git
+.gitignore
+node_modules/
+data/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.sqlite3
+**/backups/
+*.dcm
+*.nii
+*.nii.gz
+*.svs
+*.csv
+*.dump
+*.log
+tests/
+docs/
+.claude/

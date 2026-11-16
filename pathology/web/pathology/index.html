@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" data-app="pathology" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pathology</title>
+<link rel="stylesheet" href="/shared/ui.css">
+<style>
+  body { overflow: hidden; }
+  #app { display: flex; flex-direction: column; height: 100vh; overflow-y: auto; overflow-x: hidden; } /* The image area never drops below half the window: when the toolbars need more room (a small screen or a large --ui-scale) the page scrolls instead of squeezing the image. */
+  .pstrip { display: flex; gap: 1.125rem; align-items: baseline; padding: 0.375rem 1rem; background: var(--surface-2); border-bottom: 1px solid var(--line); min-height: 2.125rem; }
+  .pstrip strong { font-size: 1.1875rem; }
+  .wl { flex: 1; min-height: 0; display: grid; grid-template-columns: 13.75rem minmax(0, 1fr) 21.25rem; }
+  .wl > * { min-height: 0; overflow: auto; }
+  .tree { background: var(--surface); border-right: 1px solid var(--line); padding: 0.75rem 0.625rem; }
+  .tree button { display: flex; width: 100%; justify-content: space-between; align-items: center; border: none; background: none; text-align: left; height: 2rem; padding: 0 0.5rem; }
+  .tree button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .tree h3 { margin: 0.875rem 0.5rem 0.375rem; font-size: 1rem; }
+  .centre { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .metrics { display: flex; flex-wrap: wrap; gap: 0.5rem 1.375rem; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0.625rem; font-size: 1.0313rem; }
+  .metrics b { font-variant-numeric: tabular-nums; font-size: 1.125rem; }
+  .info { background: var(--surface); border-left: 1px solid var(--line); padding: 0.875rem; }
+  .info section + section { border-top: 1px solid var(--line); margin-top: 0.75rem; padding-top: 0.75rem; }
+  .prio { display: inline-block; width: 0.75rem; height: 0.75rem; border-radius: 50%; border: 0.1875rem solid; vertical-align: middle; }
+  .prio.stat { border-color: #e5484d; } .prio.urgent { border-color: #e0a83a; } .prio.routine { border-color: #4f8fd1; }
+  .reader { display: inline-grid; place-items: center; min-width: 1.375rem; height: 1.375rem; padding: 0 0.25rem; border-radius: 62.4375rem; background: var(--accent); color: var(--on-accent); font-size: 0.9063rem; font-weight: 700; margin-left: 0.25rem; }
+  .elapsed.late { color: #ff6b6b; font-weight: 700; }
+  .centre th, .centre td { padding-left: 0.625rem; padding-right: 0.625rem; }
+  .pending-stain { color: #e0a83a; font-weight: 700; }
+
+  .casepage { flex: 1; min-height: 0; display: grid; grid-template-rows: max-content minmax(55vh, 1fr); grid-template-columns: 16.25rem minmax(0, 1fr) 27.5rem; }
+  .vtool { grid-column: 1 / -1; min-height: 3.25rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; background: var(--surface); border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .vtool button, .vtool select { height: 2.375rem; }
+  .vtool select { width: auto; }
+  .vtool .sep { width: 1px; height: 1.75rem; background: var(--line); margin: 0 0.25rem; }
+  .tray { background: var(--surface); border-right: 1px solid var(--line); overflow: auto; padding: 0.5rem; font-size: 1.0313rem; }
+  .tray h3 { font-size: 0.9688rem; margin: 0.5rem 0.125rem 0.375rem; }
+  .tray .part { margin-bottom: 0.5rem; }
+  .tray .block { margin: 0.125rem 0 0.125rem 0.5rem; }
+  .tray .block > div { color: var(--ink-3); font-size: 0.9688rem; margin: 0.125rem 0; }
+  .tray button.slide { display: flex; width: 100%; align-items: center; gap: 0.375rem; height: auto; padding: 0.3125rem 0.375rem; text-align: left; border: 1px solid transparent; background: none; font-size: 1rem; margin: 0.125rem 0 0.125rem 0.5rem; width: calc(100% - 0.5rem); }
+  .tray button.slide[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .tray button.slide .noimg { color: var(--ink-3); font-style: italic; }
+  .stain { display: inline-block; padding: 1px 0.375rem; border-radius: 62.4375rem; font-size: 0.9063rem; font-weight: 700; border: 1px solid; }
+  .stain.routine { color: #e8a0c8; border-color: #a0587e; } .stain.special { color: #9be36d; border-color: #4e7f2e; } .stain.immuno { color: #4fb3d1; border-color: #2a6b80; }
+  .stagewrap { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .stagewrap .stage { flex: 1; }
+  .annot { display: flex; align-items: center; gap: 0.25rem; padding: 0.1875rem 0.5rem; background: var(--surface); border-bottom: 1px solid var(--line); white-space: nowrap; overflow-x: auto; font-size: 1rem; } .annot button { height: 1.5rem; font-size: 0.9688rem; padding: 0 0.375rem; } .annot button[aria-pressed="true"] { background: var(--accent-soft); color: var(--on-accent-soft); } .annot[hidden] { display: none; }
+  .stage { background: #0b0d10; display: grid; min-height: 0; min-width: 0; position: relative; gap: 0.125rem; }
+  .stage.n2 { grid-template-columns: 1fr 1fr; }
+  .slidepane { position: relative; background: #0b0d10; min-height: 0; min-width: 0; outline: 1px solid #1c262d; }
+  .slidepane.active { outline: 1px solid var(--accent); z-index: 1; }
+  .osd { position: absolute; inset: 0; }
+  .osd:focus { outline: none; }
+  .stain-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .tools-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .stagewrap { position: relative; }
+  .anpanel { position: absolute; top: 0.5rem; right: 0.5rem; width: 31.25rem; max-width: 60%; max-height: calc(100% - 1rem); overflow: auto; z-index: 40; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 0.625rem; padding: 0.625rem 0.75rem; box-shadow: 0 0.5rem 1.75rem rgba(0,0,0,.45); }
+  .anpanel h3 { margin: 0 0 0.375rem; font-size: 1.125rem; }
+  .ansec { border-top: 1px solid var(--line); padding: 0.375rem 0; }
+  .ansec summary { font-weight: 600; cursor: pointer; }
+  .anrow { display: flex; flex-wrap: wrap; gap: 0.375rem 0.625rem; align-items: center; margin: 0.375rem 0; }
+  .anrow input[type="text"], .anrow input[type="number"], .anrow select { height: 2rem; }
+  .anpanel .swatch { display: inline-block; width: 1.125rem; height: 1.125rem; border-radius: 0.25rem; border: 1px solid var(--line); }
+  .antable { overflow: auto; max-height: 13.75rem; margin: 0.375rem 0; }
+  .antable table { border-collapse: collapse; font-size: 0.9375rem; } .antable th, .antable td { border: 1px solid var(--line); padding: 0.125rem 0.5rem; text-align: right; white-space: nowrap; } .antable th:first-child, .antable td:first-child, .antable td:nth-child(2) { text-align: left; }
+  .tools-canvas.active { pointer-events: auto; cursor: crosshair; }
+  .scalebar { position: absolute; left: 0.75rem; bottom: 0.75rem; color: #e8edf1; font-family: var(--mono); font-size: 0.9688rem; text-shadow: 0 0 0.1875rem #000; pointer-events: none; }
+  .scalebar .bar { height: 0.25rem; background: #e8edf1; border: 1px solid #000; margin-bottom: 0.125rem; }
+  .mag { position: absolute; left: 0.75rem; top: 0.625rem; color: #e8edf1; font-family: var(--mono); font-size: 1rem; text-shadow: 0 0 0.1875rem #000; pointer-events: none; white-space: pre; }
+  .pane-tag { position: absolute; right: 0.75rem; top: 0.625rem; color: #b7c2cb; font-family: var(--mono); font-size: 1rem; text-shadow: 0 0 0.1875rem #000; pointer-events: none; }
+  .navigator { position: absolute; right: 0.625rem; bottom: 0.625rem; width: 10rem; height: 7.5rem; border: 1px solid #3a4652; background: #000; z-index: 2; }
+  .report { background: var(--surface); border-left: 1px solid var(--line); overflow: auto; padding: 0.875rem; }
+  .report textarea { min-height: 4.5rem; }
+  .report label.field { margin-bottom: 0.625rem; }
+  .report .ro { white-space: pre-wrap; margin: 0 0 0.75rem; }
+  .history { font-size: 1.0313rem; }
+  [data-embed] .casepage { grid-template-columns: minmax(0, 1fr); grid-template-rows: max-content minmax(55vh, 1fr); }
+  .casepage.slideonly { grid-template-columns: minmax(0, 1fr); }
+  [data-embed] .report, [data-embed] .tray, [data-embed] .topbar, [data-embed] .pstrip, [data-embed] .recbar { display: none; }
+  .drop { border: 0.125rem dashed var(--line-s); border-radius: 0.625rem; padding: 2.25rem; text-align: center; color: var(--ink-2); }
+  .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  @media (max-width: 1100px) { .wl { grid-template-columns: 11.25rem minmax(0, 1fr); } .info { display: none; } .casepage { grid-template-columns: 10.625rem minmax(0, 1fr) 20rem; } }
+  /* Toolbar buttons in the same rounded pill style as the Agent Dashboard's section bar. */
+  .vtool { background: var(--surface-2); border-radius: 999px; margin: 0.375rem 0.5rem; padding: 0.3125rem 0.5rem !important; border: 0 !important; gap: 0.25rem !important; }
+  .vtool button, .vtool select, .vtool button.tb { border: 0 !important; background: none; border-radius: 999px !important; padding: 0 0.875rem !important; height: 2.125rem !important; color: var(--ink-2); font-weight: 500; }
+  .vtool button:hover { background: var(--surface) !important; color: var(--ink); }
+  .vtool button[aria-pressed="true"], .vtool button.tb[aria-pressed="true"], .vtool button.primary { background: var(--ink) !important; color: var(--surface) !important; font-weight: 600; }
+  .vtool .sep { display: none; }
+  /* Report pane: the same sleek pill style as the Agent Dashboard. No stock white buttons. */
+  .report { background: var(--surface) !important; }
+  .report h2, .report h3 { letter-spacing: -0.01em; }
+  .report button, .report a.btn { border: 0 !important; border-radius: 999px !important; background: var(--surface-2) !important; color: var(--ink) !important; height: 2.125rem; padding: 0 1rem !important; font-weight: 500; box-shadow: none !important; }
+  .report button:hover:not(:disabled), .report a.btn:hover { background: var(--ink) !important; color: var(--surface) !important; }
+  .report button.primary { background: var(--ink) !important; color: var(--surface) !important; font-weight: 600; }
+  .report button.danger { background: var(--danger-soft) !important; color: var(--danger-text, var(--danger)) !important; }
+  .report button.small { height: 1.875rem; padding: 0 0.875rem !important; font-size: 0.875rem; }
+  .report button:disabled { opacity: .45; }
+  .report select, .report input[type="text"], .report input[type="search"], .report input:not([type]) { border: 0 !important; border-radius: 999px !important; background: var(--surface-2) !important; height: 2.125rem; padding: 0 1rem !important; }
+  .report textarea { border: 0 !important; border-radius: 1rem !important; background: var(--surface-2) !important; padding: 0.75rem 1rem !important; }
+  .report select:focus, .report input:focus, .report textarea:focus { outline: 0.125rem solid var(--accent); outline-offset: 1px; }
+  .report .toolbar { gap: 0.375rem; flex-wrap: wrap; }
+  .report details > summary { display: inline-block; list-style: none; cursor: pointer; border-radius: 999px; background: var(--surface-2); padding: 0.375rem 1rem; font-weight: 500; }
+  .report details > summary::-webkit-details-marker { display: none; }
+  .report details[open] > summary { background: var(--ink); color: var(--surface); }
+  .report label.field > span { font-weight: 600; font-size: 0.875rem; color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/pathology/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Healthcare InSilico</title>
+<script>
+  // The desktop has its own styles; the one size number lives at the top of /shared/ui.css and is read from there.
+  (function () { try { var x = new XMLHttpRequest(); x.open("GET", "/shared/ui.css", false); x.send(); var m = /--ui-scale:\s*([0-9.]+)/.exec(x.responseText); if (m && !document.documentElement.style.getPropertyValue("--ui-scale")) document.documentElement.style.setProperty("--ui-scale", m[1]); } catch (e) { /* base size */ } })();
+</script>
+<style>
+  html { font-size: calc(16px * var(--ui-scale, 1)); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 1.125rem; line-height: 1.45; color: #e8edf1; background: #0b0d14; }
+  button, select, input { font: inherit; }
+  :focus-visible { outline: 0.125rem solid #A9D7E8; outline-offset: 1px; }
+  [hidden] { display: none !important; }
+  #wallpaper { position: fixed; inset: 0; background: #0b0d14 center / cover no-repeat; transition: filter .12s; }
+  .veil { position: fixed; inset: 0; background: rgba(8, 10, 20, .28); }
+
+  /* Lock screen */
+  #lock { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 11vh 1.5rem 13vh; text-shadow: 0 1px 0.5rem rgba(0,0,0,.6); }
+  #lock .clock { text-align: center; }
+  #lock .clock b { display: block; font-size: clamp(4rem, 9vw, 7rem); font-weight: 300; letter-spacing: -.02em; line-height: 1; }
+  #lock .clock span { font-size: clamp(1.125rem, 2vw, 1.75rem); color: #e8edf1; }
+  #lock form, #lock .demo { display: flex; flex-direction: column; align-items: center; gap: 0.875rem; width: 27.5rem; max-width: calc(100vw - 3rem); text-shadow: none; font-size: 1.1875rem; }
+  #lock form .avatar, #lock .demo .avatar { width: 6.25rem; height: 6.25rem; font-size: 2.5rem; }
+  #lock form select, #lock form input, #lock form button, #lock .demo button { height: 3.5rem; font-size: 1.1875rem; }
+  .avatar { width: 5.25rem; height: 5.25rem; border-radius: 50%; display: grid; place-items: center; font-size: 2.125rem; font-weight: 600; color: #2E3A80; background: #A9B4E8; box-shadow: 0 0.375rem 1.5rem rgba(0,0,0,.35); }
+  #lock select, #lock input, #lock button { width: 100%; height: 3rem; border-radius: 0.625rem; border: 1px solid rgba(255,255,255,.35); background: rgba(10, 14, 26, .55); color: #fff; padding: 0 0.75rem; backdrop-filter: blur(0.625rem); }
+  #lock select option { color: #16202a; }
+  #lock button.login { background: #4A59B8; border-color: #4A59B8; font-weight: 600; cursor: pointer; }
+
+  /* Desktop */
+  #desktop { position: fixed; inset: 0; }
+  #menubar { position: fixed; top: 0; left: 0; right: 0; height: 2.125rem; display: flex; align-items: center; gap: 0.875rem; padding: 0 0.75rem; background: rgba(20, 24, 36, .72); backdrop-filter: blur(1rem); color: #e8edf1; font-size: 1.0625rem; z-index: 300; border-bottom: 1px solid rgba(255,255,255,.08); }
+  #menubar button { background: none; border: none; color: inherit; cursor: pointer; padding: 0.125rem 0.625rem; border-radius: 0.375rem; height: 1.875rem; }
+  #menubar button:hover { background: rgba(255,255,255,.12); }
+  #menubar .front { font-weight: 650; }
+  #menubar .right { margin-left: auto; display: flex; align-items: center; gap: 0.875rem; }
+  #menubar .chip.warn { background: #F3D27A; color: #5B3A00; }
+  #menubar .chip { background: #A9B4E8; color: #2E3A80; border-radius: 62.4375rem; padding: 1px 0.625rem; font-weight: 600; font-size: 1rem; }
+  #menubar .rec { width: 0.625rem; height: 0.625rem; border-radius: 50%; background: #F7313B; box-shadow: 0 0 0 0.1875rem rgba(247,49,59,.3); }
+  #menubar .muted { color: #b7c2cb; }
+  .menu { position: fixed; top: 2.25rem; left: 0.5rem; min-width: 13.75rem; background: rgba(28, 32, 46, .94); border: 1px solid rgba(255,255,255,.14); border-radius: 0.625rem; padding: 0.375rem; z-index: 310; box-shadow: 0 0.75rem 2.5rem rgba(0,0,0,.5); backdrop-filter: blur(1rem); }
+  .menu button { display: block; width: 100%; text-align: left; background: none; border: none; color: #e8edf1; padding: 0.4375rem 0.625rem; border-radius: 0.375rem; cursor: pointer; }
+  .menu button:hover { background: #A9B4E8; color: #2E3A80; }
+  .menu hr { border: none; border-top: 1px solid rgba(255,255,255,.12); margin: 0.25rem 0; }
+  #dock { position: fixed; left: 50%; bottom: 0.625rem; transform: translateX(-50%); transition: transform .2s ease-out; display: flex; align-items: flex-end; gap: 1.125rem; padding: 1.125rem; max-width: calc(100vw - 1.25rem); background: #171824ee; border: 1px solid #ffffff22; border-radius: 1.75rem; box-shadow: 0 1.375rem 2.5rem rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06); backdrop-filter: blur(1rem); z-index: 300; }
+  /* The dock slides away while windows are in use and comes back when the pointer touches the bottom edge (the strip below catches it, even over a window). */
+  #dock.away { transform: translate(-50%, calc(100% + 1rem)); }
+  #dock button { position: relative; --dock-w: min(6.375rem, calc((100vw - 3.5rem) / var(--dock-n, 11) - 1.125rem)); width: var(--dock-w); flex: none; padding: 0; height: calc(var(--dock-w) + 0.5rem); border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.5rem; border-radius: 0.75rem; transition: transform .12s; }
+  #dock button:hover { transform: translateY(-0.25rem); }
+  #dock button img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 23.6%; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0.625rem 1.5rem rgba(0,0,0,.16); }
+  #dock button .label { font-size: 0.75rem; color: #f5f6fbcc; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1; }
+  #dock button .dot { position: absolute; bottom: -0.5rem; width: 0.3125rem; height: 0.3125rem; border-radius: 50%; background: #e8edf1; opacity: 0; }
+  #dock button.open .dot { opacity: 1; }
+  #dock button.off { cursor: not-allowed; }
+  #dock button.off img { filter: grayscale(1) opacity(.35); }
+  #dock button .tip { position: absolute; bottom: calc(100% + 0.75rem); left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(20,24,36,.94); color: #fff; padding: 0.5rem 1rem; border-radius: 0.625rem; font-size: 1.5rem; font-weight: 600; box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,.4); pointer-events: none; opacity: 0; transition: opacity .1s; border: 1px solid rgba(255,255,255,.12); }
+  #dock button:hover .tip, #dock button:focus-visible .tip, #dock button.said .tip { opacity: 1; }
+
+  /* Windows */
+  #windows { position: fixed; inset: 2.125rem 0 0 0; }
+  .win { position: absolute; display: flex; flex-direction: column; min-width: 22.5rem; min-height: 15rem; background: #fff; border-radius: 0.75rem; box-shadow: 0 1.125rem 3.75rem rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.25); overflow: hidden; }
+  .win.max { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100vh - 2.125rem) !important; border-radius: 0; }
+  .win .titlebar { height: 2.5rem; display: flex; align-items: center; gap: 0.5rem; padding: 0 0.625rem; background: #E4E7EE; border-bottom: 1px solid #D9DDE5; color: #1F2430; cursor: grab; user-select: none; }
+  .win.dark .titlebar { background: #1F232C; border-color: #343A48; color: #e8edf1; }
+  .win .titlebar .lights { display: flex; gap: 0.4375rem; }
+  .win .titlebar .lights button { width: 1rem; height: 1rem; border-radius: 50%; border: none; padding: 0; cursor: pointer; }
+  .win .titlebar .lights .close { background: #F7313B; } .win .titlebar .lights .min { background: #E0A83A; } .win .titlebar .lights .max { background: #1F6F86; }
+  .win .titlebar .name { flex: 1; text-align: center; font-weight: 600; font-size: 1.0625rem; }
+  .win .titlebar img { width: 1.375rem; height: 1.375rem; }
+  .win iframe { flex: 1; border: none; width: 100%; background: #fff; }
+  .win.dragging iframe, body.dragging iframe { pointer-events: none; }
+  .win .resize { position: absolute; right: 0; bottom: 0; width: 1.125rem; height: 1.125rem; cursor: nwse-resize; }
+  dialog.sys { border: none; border-radius: 0.75rem; padding: 0; width: min(38.75rem, calc(100vw - 2rem)); background: #fff; color: #1F2430; box-shadow: 0 1.125rem 3.75rem rgba(0,0,0,.45); }
+  dialog.sys::backdrop { background: rgba(0,0,0,.4); }
+  dialog.sys header { padding: 0.875rem 1rem; border-bottom: 1px solid #D9DDE5; font-weight: 650; font-size: 1.25rem; }
+  dialog.sys .body { padding: 1rem; }
+  dialog.sys footer { padding: 0.75rem 1rem; border-top: 1px solid #D9DDE5; display: flex; justify-content: flex-end; gap: 0.5rem; }
+  dialog.sys button { height: 2.5rem; border-radius: 0.5rem; border: 1px solid #D9DDE5; background: #fff; color: #1F2430; padding: 0 0.75rem; cursor: pointer; }
+  dialog.sys button.primary { background: #4A59B8; border-color: #4A59B8; color: #fff; font-weight: 600; }
+  .papers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.625rem; }
+  .papers button { height: auto; padding: 0; overflow: hidden; border-radius: 0.625rem; display: flex; flex-direction: column; align-items: stretch; }
+  .papers button[aria-pressed="true"] { outline: 0.1875rem solid #4A59B8; }
+  .papers .thumb { height: 4.5rem; background: #334 center / cover; }
+  .papers span { padding: 0.375rem; font-size: 1rem; }
+  .note { font-size: 1.0313rem; color: #4A5160; }
+</style>
+</head>
+<body>
+<div id="wallpaper" data-testid="wallpaper"></div>
+<div class="veil"></div>
+
+<section id="lock" data-testid="lock-screen" hidden>
+  <div class="clock"><b id="lock-time" data-testid="lock-time"></b><span id="lock-date"></span></div>
+  <form id="login" data-testid="login-form" aria-label="Log in" hidden>
+    <div class="avatar" id="avatar" aria-hidden="true">?</div>
+    <select id="role" data-testid="desktop-role" aria-label="Role"></select>
+    <select id="patient" data-testid="desktop-patient" aria-label="Which patient" hidden></select>
+    <input id="user" data-testid="desktop-user" aria-label="Your name (optional)" placeholder="Name (optional)" autocomplete="off" maxlength="60">
+    <button type="submit" class="login" data-testid="desktop-login" aria-label="Try as this role">Try as this role</button>
+    <span class="note" style="color:#dfe3ff">Demonstration. No password is asked for.</span>
+  </form>
+  <div id="demo" class="demo" data-testid="demo-form" role="group" aria-label="Try the platform without signing in" hidden>
+    <div class="avatar" aria-hidden="true">?</div>
+    <div id="demo-buttons" data-testid="demo-buttons" style="display:flex;flex-direction:column;gap:0.75rem;width:100%"></div>
+    <span class="note" id="demo-note" data-testid="demo-note" role="status" style="color:#dfe3ff">Demo. No password is asked for. Try as Patient uses one of the imported patients, picked at random.</span>
+  </div>
+  <form id="emailform" data-testid="email-form" aria-label="Log in" novalidate hidden>
+    <div class="avatar" aria-hidden="true">?</div>
+    <input id="email-input" data-testid="email-input" type="email" aria-label="Email" placeholder="Email" autocomplete="email" maxlength="254">
+    <select id="email-role" data-testid="login-role" aria-label="Log in as"></select>
+    <button type="submit" class="login" data-testid="login-submit" aria-label="Log in">Log in</button>
+    <span class="note" id="email-note" data-testid="login-note" role="alert" style="color:#dfe3ff"></span>
+  </form>
+  <form id="signin" data-testid="signin-form" aria-label="Sign in" hidden>
+    <div class="avatar" aria-hidden="true">?</div>
+    <input id="signin-email" data-testid="signin-email" type="email" aria-label="Email" placeholder="Email" autocomplete="username" maxlength="200">
+    <input id="signin-password" data-testid="signin-password" type="password" aria-label="Password" placeholder="Password" autocomplete="current-password" maxlength="200">
+    <button type="submit" class="login" data-testid="signin-submit" aria-label="Sign in">Sign in</button>
+    <button type="button" id="continue-researcher" data-testid="continue-researcher" aria-label="Continue as Researcher" hidden>Continue as Researcher</button>
+    <button type="button" id="signin-invited" data-testid="signin-invited" aria-label="I have an invitation code">I have an invitation code</button>
+    <span class="note" id="signin-note" data-testid="signin-note" role="status" style="color:#dfe3ff"></span>
+  </form>
+  <form id="accept" data-testid="accept-form" aria-label="Use an invitation code" hidden>
+    <div class="avatar" aria-hidden="true">?</div>
+    <input id="accept-code" data-testid="accept-code" aria-label="Invitation code" placeholder="Invitation code" autocomplete="off" maxlength="40">
+    <input id="accept-password" data-testid="accept-password" type="password" aria-label="Choose a password (at least 10 characters)" placeholder="Choose a password (10 or more characters)" autocomplete="new-password" maxlength="200">
+    <button type="submit" class="login" data-testid="accept-submit" aria-label="Set password and sign in">Set password and sign in</button>
+    <button type="button" id="accept-back" data-testid="accept-back" aria-label="Back to sign in">Back to sign in</button>
+    <span class="note" id="accept-note" data-testid="accept-note" role="status" style="color:#dfe3ff"></span>
+  </form>
+</section>
+
+<section id="desktop" data-testid="desktop" hidden>
+  <div id="menubar" role="menubar" aria-label="Menu bar">
+    <button type="button" id="sysmenu" data-testid="system-menu" aria-label="System menu" aria-haspopup="true" aria-expanded="false">⌘</button>
+    <span class="front" id="front-app" data-testid="front-app">Workstation</span>
+    <div class="right">
+      <span class="chip" id="mode-chip" data-testid="mode-chip" hidden></span>
+      <span class="chip warn" id="agent-badge" data-testid="menubar-agent" role="status" aria-label="Agent requests waiting" hidden></span>
+      <span id="who" data-testid="menubar-role"></span>
+      <span class="muted" id="patient-ctx" data-testid="menubar-patient"></span>
+      <span class="rec" id="rec-dot" data-testid="recording-dot" title="Recording" hidden></span>
+      <span id="menu-clock" data-testid="menubar-clock"></span>
+    </div>
+  </div>
+  <div class="menu" id="menu" data-testid="system-menu-list" role="menu" hidden>
+    <button type="button" data-testid="menu-about" aria-label="About this platform" role="menuitem">About this platform</button>
+    <button type="button" data-testid="menu-wallpaper" aria-label="Change wallpaper" role="menuitem">Change wallpaper</button>
+    <hr>
+    <button type="button" data-testid="menu-lock" aria-label="Lock screen" role="menuitem">Lock screen</button>
+    <button type="button" data-testid="menu-logout" aria-label="Log out" role="menuitem">Log out</button>
+  </div>
+  <div id="windows" data-testid="windows"></div>
+  <nav id="dock" data-testid="dock" aria-label="Dock"></nav>
+</section>
+<script type="module" src="/desktop.js"></script>
+</body>
+</html>

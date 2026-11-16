@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-app="payer">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payer</title>
+<link rel="stylesheet" href="/shared/ui.css">
+<style>
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(21.25rem, 1fr)); gap: 1rem; align-items: start; }
+  .two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+  @media (max-width: 1200px) { .two { grid-template-columns: 1fr; } }
+  .formrow { display: flex; flex-wrap: wrap; gap: 0.625rem 0.875rem; align-items: flex-end; margin: 0.5rem 0 0.75rem; }
+  .formrow label { display: flex; flex-direction: column; gap: 0.25rem; font-weight: 600; font-size: 1rem; }
+  .formrow select, .formrow input { min-width: 11.25rem; }
+  .crit { border: 1px solid var(--line); border-radius: 0.625rem; padding: 0.5rem 0.75rem; margin: 0.375rem 0; }
+  .crit .ev { font-size: 0.9375rem; opacity: .8; }
+  .syn { font-size: 0.9375rem; opacity: .8; margin: 0 0 0.75rem; }
+  pre.letter { white-space: pre-wrap; font-family: inherit; background: var(--surface-2); border-radius: 0.5rem; padding: 0.625rem 0.75rem; margin: 0.5rem 0; }
+  ul.plain { margin: 0.25rem 0 0.5rem; padding-left: 1.25rem; }
+  .pshell { display: flex; align-items: stretch; min-height: 0; flex: 1; }
+  .pshell > main { flex: 1; min-width: 0; }
+  nav.wrap { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.75rem 0.5rem; width: 15rem; flex: none; background: var(--surface); border-right: 1px solid var(--line); position: sticky; top: 3.25rem; align-self: flex-start; min-height: calc(100vh - 3.25rem); }
+  nav.wrap a { color: var(--ink-2); padding: 0.4375rem 0.625rem; border-radius: 0.375rem; }
+  nav.wrap a:hover { background: var(--surface-2); text-decoration: none; }
+  nav.wrap a[aria-current="page"] { color: var(--on-accent-soft); background: var(--accent-soft); font-weight: 600; }
+  .two > div, .pgrid { row-gap: 1rem; } .two > div { display: flex; flex-direction: column; gap: 1rem; }
+  main .card + .card, main .card + div, main div + .card, main table + .card, main .tablewrap + .card { margin-top: 1rem; } .two .card, .pgrid .card { margin-top: 0 !important; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/payer/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-app="lab">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab</title>
+<link rel="stylesheet" href="/shared/ui.css">
+<style>
+  .metrics { display: flex; flex-wrap: wrap; gap: 0.5rem 1.375rem; padding: 0.5rem 0.75rem; margin-bottom: 0.875rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0.625rem; font-size: 1.0313rem; }
+  .metrics b { font-variant-numeric: tabular-nums; font-size: 1.125rem; }
+  .elapsed.late { color: var(--danger); font-weight: 600; }
+  .specimen { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 1rem; align-items: start; }
+  .lj { width: 100%; max-width: 47.5rem; height: 13.75rem; background: var(--surface); border: 1px solid var(--line); border-radius: 0.625rem; }
+  .lj text { font-size: 0.9375rem; fill: var(--ink-3); font-family: var(--mono); }
+  .lj .mean { stroke: var(--ink-3); stroke-width: 1; }
+  .lj .sd2 { stroke: var(--warn); stroke-dasharray: 4 3; }
+  .lj .sd3 { stroke: var(--danger); stroke-dasharray: 2 3; }
+  .lj .pt { fill: var(--accent); }
+  .lj .pt.out { fill: var(--danger); }
+  .lj polyline { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+  @media (max-width: 1100px) { .specimen { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/lab/app.js"></script>
+</body>
+</html>
